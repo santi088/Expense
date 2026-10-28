@@ -43,24 +43,23 @@ app.get('/health', async (_req, res, next) => {
   }
 });
 
-// function validateBody<T extends z.ZodTypeAny>(schema: T) {
-//   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
-//     const result = schema.safeParse(req.body)
-//     if(!result.success) {
-//       res.status(400).json({error: result.error.issues});
-//     }
-//     req.body = result.data;
-//     next()
-//   }
-// }
-
 function validateBody<T extends z.ZodTypeAny>(schema: T) {
   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const result = schema.safeParse(req.body);
     const params = ParamsInput.safeParse(req.params);
 
-    if(!result.success){
-      return res.status(400).json({error: result.error.issues})
+    if (!result.success) {
+      // single message string
+      const msg = result.error.issues[0].message;
+      // → "Too small: expected number to be >0"
+
+      // or map all issues to { field, message }
+      const errors = result.error.issues.map(i => ({
+        field: i.path.join("."),
+        message: i.message,
+      }));
+
+      return res.status(400).json({ error: errors });
     }
     req.body = result.data;
 
@@ -110,6 +109,7 @@ app.post('/expenses',
   validateBody(ExpenseInput), 
   async (req, res, next) => {
     const {category_id, amount, spent_on, note} = req.body
+
     try {
 
       if(category_id < 1 && category_id > category_count){
