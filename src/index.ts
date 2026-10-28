@@ -50,9 +50,7 @@ app.post('/categories',
   async (req, res, next) => {
     const {name} = req.body;
     try {
-      const result = await pool.query(
-        'INSERT INTO categories (name) VALUES ($1) RETURNING *', [name] 
-      )
+      //post
 
       category_count += 1
 
@@ -65,9 +63,7 @@ app.post('/categories',
 
 app.get('/categories', async (req, res, next) => {
   try {
-    const result = await pool.query(
-      "SELECT * FROM categories"
-    )
+    //findall
 
     if(result.rowCount === 0){
       return res.status(200).json({response: 'nothing to see here...'});
@@ -78,6 +74,21 @@ app.get('/categories', async (req, res, next) => {
     next(err)
   }
 })
+
+app.patch('/categories/:id', 
+  validateBody(CategoryInput),
+  async (req, res, next) => {
+    try {
+      const id =  req.params.id;
+      const { name } = req.body;
+      //patch
+
+      return res.status(201).json({"response": result.rows})
+
+    } catch (err) {
+      next(err)
+    }
+  })
 
 app.post('/expenses', 
   validateBody(ExpenseInput), 
