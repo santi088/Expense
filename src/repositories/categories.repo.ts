@@ -6,7 +6,7 @@ export const categoryRepo = {
         )
         return result.rows;
     },
-    async post(name: string){
+    async create(name: string){
         const result = await pool.query(
             `INSERT INTO categories (name) 
              VALUES ($1) RETURNING *`, [name] 
@@ -14,7 +14,7 @@ export const categoryRepo = {
 
         return result.rows[0];
     },
-    async patch(id: number, name: string){
+    async update(id: string, name: string){
         const result = await pool.query(`
             UPDATE categories
             SET name = $1

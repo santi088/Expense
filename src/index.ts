@@ -5,6 +5,8 @@ import {CategoryInput, ExpenseInput, ParamsInput} from './zod/objects.js'
 import { z } from 'zod';
 import { errorHandler } from './middleware/error.middleware.js';
 import { validateBody } from './middleware/validateBody.js';
+import { categoryServices } from './services/categories.services.js';
+import { expensesServices } from './services/expenses.service.js';
 
 const app = express();
 app.use(express.json())
@@ -51,10 +53,10 @@ app.post('/categories',
     const {name} = req.body;
     try {
       //post
-
+      const result = await categoryServices.post(name);
       category_count += 1
 
-      return res.status(201).json({"response": result.rows})
+      return res.status(201).json({"response": result})
 
     } catch (err) {
       next(err)
@@ -64,12 +66,12 @@ app.post('/categories',
 app.get('/categories', async (req, res, next) => {
   try {
     //findall
-
-    if(result.rowCount === 0){
+    const result = await categoryServices.getAll();
+    if(result.length === 0){
       return res.status(200).json({response: 'nothing to see here...'});
     }
     
-    return res.status(200).send(result.rows)
+    return res.status(200).send(result)
   } catch (err) {
     next(err)
   }
@@ -77,13 +79,13 @@ app.get('/categories', async (req, res, next) => {
 
 app.patch('/categories/:id', 
   validateBody(CategoryInput),
-  async (req, res, next) => {
+  async (req: express.Request<{ id: string }>, res, next) => {
     try {
       const id =  req.params.id;
       const { name } = req.body;
-      //patch
+      const result = await categoryServices.patch(id, name);
 
-      return res.status(201).json({"response": result.rows})
+      return res.status(201).json({"response": result})
 
     } catch (err) {
       next(err)
@@ -95,19 +97,10 @@ app.post('/expenses',
   async (req, res, next) => {
     const {category_id, amount, spent_on, note} = req.body
 
-    try {
-
-      if(category_id < 1 && category_id > category_count){
-        return res.status(400).json({error: "invalid category id."})
-      }
-
-      const result = await pool.query(
-        `INSERT INTO expenses (category_id, amount, spent_on, note)
-         VALUES ($1, $2, $3, $4) RETURNING id, amount, note
-        `, [category_id, amount, spent_on, note]
-      )
-
-      return res.status(201).json({response: result.rows})
+    try {      
+      const result = await expensesServices.post(category_count, category_id, amount, spent_on, note);
+      
+      return res.status(201).json({response: result})
 
     } catch (err) {
       next(err)
