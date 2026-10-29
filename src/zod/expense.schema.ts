@@ -14,3 +14,7 @@ export const CategoryInput = z.object({
 export const ParamsInput = z.object({
   id: z.number().int().positive()
 })
+
+const Partial = ExpenseInput.partial()
+export type Expense = z.infer<typeof ExpenseInput>
+export type PartialExpense = z.infer<typeof Partial>

@@ -1,6 +1,6 @@
 import express from 'express';
 import { z } from 'zod';
-import { ParamsInput } from '../zod/objects.js';
+import { ParamsInput } from '../zod/expense.schema.js';
 
 export function validateBody<T extends z.ZodTypeAny>(schema: T) {
   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
