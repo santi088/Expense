@@ -1,10 +1,10 @@
 import { pool } from "../config/db.js";
 import {z} from "zod";
-import { PartialExpense } from "../zod/expense.schema.js";
+import { PartialExpense , Expense} from "../zod/expense.schema.js";
 
 
 export const expenseRepo = {
-    async create(category_id: number, amount: number, spent_on: string, note?: string){
+    async create({category_id, amount, spent_on, note}: Expense){
         const result = await pool.query(
             `INSERT INTO expenses (category_id, amount, spent_on, note)
                 VALUES ($1, $2, $3, $4) RETURNING id, amount, note
